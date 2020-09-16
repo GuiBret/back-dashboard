@@ -69,7 +69,26 @@ export class AppService {
       
     });
 
-  } 
+  }
+
+  deleteTodo(idTodo: string) {
+    return new Promise(async (resolve, reject) => {
+      
+      const todoToDelete = this.todoModel.findByIdAndDelete(mongoose.Types.ObjectId(idTodo));
+
+    if(await todoToDelete.count({}).exec() !== 0) {
+      
+      resolve({status: 'OK', newList: await this.getTodos()});
+    
+    } else {
+      resolve({status: 'KO', error: 'NOT_FOUND'});
+    }
+
+    
+      
+      
+    })
+  }
   
 }
 

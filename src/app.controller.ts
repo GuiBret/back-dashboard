@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Request, ParamData, Param } from '@nestjs/common';
+import { Controller, Get, Post, Req, Request, ParamData, Param, Delete } from '@nestjs/common';
 import { AppService } from './app.service';
 import { TodoMongoose } from 'backend/models/todo.schema';
 import * as mongoose from 'mongoose';
@@ -30,8 +30,8 @@ export class AppController {
     return this.appService.saveTodos(todos);
   }
 
-  @Post('todos/:idtodo/edit')
-  editTodo(@Req() request: Request, @Param() params) {
+  @Post('todos/:idtodo')
+  editTodo(@Req() request: Request, @Param() params) : Promise<any>{
 
     
     const form : any = request.body;
@@ -40,5 +40,12 @@ export class AppController {
     return this.appService.editTodo(idTodo, todoData);
     
     // return this.appService.saveTodos(todoData);
+  }
+
+  @Delete('todos/:idtodo')
+  deleteTodo(@Req() request: Request, @Param() params) {
+    const idTodo: string = params.idtodo;
+
+    return this.appService.deleteTodo(idTodo);
   }
 }
