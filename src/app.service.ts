@@ -74,9 +74,9 @@ export class AppService {
   deleteTodo(idTodo: string) {
     return new Promise(async (resolve, reject) => {
       
-      const todoToDelete = this.todoModel.findByIdAndDelete(mongoose.Types.ObjectId(idTodo));
+      const todoToDelete = await this.todoModel.findByIdAndDelete(mongoose.Types.ObjectId(idTodo)).exec();
 
-    if(await todoToDelete.count({}).exec() !== 0) {
+    if(todoToDelete) {
       
       resolve({status: 'OK', newList: await this.getTodos()});
     
