@@ -3,6 +3,7 @@ import { Controller, Get, Param, Query, Req, Res, Post } from '@nestjs/common';
 import { SpotifyService } from './spotify.service';
 import * as fs from 'fs';
 import * as querystring from 'querystring';
+import { map } from 'rxjs/operators';
 
 
 @Controller('spotify')
@@ -52,25 +53,30 @@ export class SpotifyController {
   q(@Param() params) {
     const queryStr = params.query;
     
-    return this.spotifyService.spotifyAutoComp(queryStr).subscribe((response) => {
-      console.log(response);
-      return {status: 'OK'};
-    })
+    return this.spotifyService.spotifyAutoComp(queryStr);
   }
   @Get('get-code')
   getToken(@Query() query, @Res() res) {
     
     if(query.code) {
         const code = query.code;
-        
-        this.spotifyService.getSpotifyToken(code, this.clientId, this.clientSecret).subscribe((response) => {
+        if(this.clientId === '' || this.clientSecret === '') {
+            return {status: 'KO', error:'MISSING_CLIENT_OR_SECRET'};
+        }
+        this.spotifyService.getSpotifyToken(code, this.clientId, this.clientSecret)
+                           .pipe(map((response) => {
+                               
+                               return response;
+                            
+                            
+                           })).subscribe((response) => {
       
             this.spotifyService.storeSpotifyToken(response.data.access_token);
             res.redirect('http://localhost:4200/spotify');
         });
 
     } else {
-      console.log('On passe ici');
+      
       this.spotifyService.storeSpotifyToken(query.access_token);
       
     }
@@ -79,15 +85,5 @@ export class SpotifyController {
 
     
   }
-
-  @Post('save-token')
-    saveToken(@Query() query) {
-      
-      return '';
-  }
-
-
-
-
 
 }
