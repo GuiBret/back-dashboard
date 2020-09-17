@@ -1,34 +1,42 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { EasyconfigService } from 'nestjs-easyconfig';
-import { Connection, Model } from 'mongoose';
+import { Injectable, OnModuleInit, HttpServer, HttpService } from '@nestjs/common';
+import { Model } from 'mongoose';
 import { TodoMongoose } from 'backend/models/todo.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Observable, observable } from 'rxjs';
-import { stringify } from 'querystring';
 import * as mongoose from 'mongoose';
 
 @Injectable()
 export class AppService {
+  clientId = "";
+  clientSecret = "";
+  spotify_token = '';
 
-  
-
-  constructor(@InjectModel(TodoMongoose.name) private todoModel: Model<TodoMongoose>) {
+  constructor(@InjectModel(TodoMongoose.name) private todoModel: Model<TodoMongoose>, private http: HttpService) {
     
     
   }
   
+  
+
   getHello(): string {
     return 'Hello World!';
   }
 
   getTodos() { 
-    
+  
     return this.todoModel.find().exec();
      
   }
 
   addTodo(todoToAdd: TodoMongoose) {
-    this.todoModel.create(todoToAdd);
+    return new Promise(async (resolve, reject) => {
+      const todo = await this.todoModel.create(todoToAdd);
+
+      console.log(todo);
+
+      resolve({status: 'OK', newList: await this.getTodos()});
+    })
+    
   }
 
   saveTodos(todoListToAdd: Array<TodoMongoose>): Observable<any>{
@@ -54,11 +62,11 @@ export class AppService {
 
     return new Promise(async (resolve, reject) => {
 
-      todo._id = mongoose.Types.ObjectId(idTodo);
+      // todo._id = mongoose.Types.ObjectId(idTodo);
+
       
-      
-    // const todoToEdit = await this.todoModel.findById(mongoose.Types.ObjectId(idTodo)).exec();
-      const todoToEdit = await this.todoModel.findOne(mongoose.Types.ObjectId(idTodo)).exec();
+    const todoToEdit = await this.todoModel.findById(mongoose.Types.ObjectId(idTodo)).exec();
+      // const todoToEdit = await this.todoModel.findById(idTodo).exec();
       
       if(!todoToEdit) {
         resolve({status: 'KO', error: 'NOT_FOUND'});
@@ -87,9 +95,10 @@ export class AppService {
     
       
       
-    })
+    });
   }
-  
+
+
 }
 
 
