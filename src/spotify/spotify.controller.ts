@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { Controller, Get, Param, Query, Res } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res, Req, Headers } from '@nestjs/common';
 import { SpotifyService } from './spotify.service';
 import * as fs from 'fs';
 import { map } from 'rxjs/operators';
@@ -38,10 +38,16 @@ export class SpotifyController {
     }
 
   @Get('autocomp/:query')
-  q(@Param() params) {
+  q(@Param() params, @Headers('Authorization') authHeader) {
     const queryStr = params.query;
     
-    return this.spotifyService.spotifyAutoComp(queryStr);
+    if(!authHeader) {
+      return {status: 'KO', error: 'MISSING_TOKEN'};
+    } else {
+      const token = authHeader.split(' ')[1];
+      return this.spotifyService.spotifyAutoComp(queryStr, token);
+    }
+    
   }
   @Get('get-code')
   getToken(@Query() query, @Res() res) {

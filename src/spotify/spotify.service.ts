@@ -41,12 +41,7 @@ export class SpotifyService implements OnModuleInit {
             grant_type: "authorization_code"
         };
         
-        console.log('https://accounts.spotify.com/api/token', querystring.stringify(formEncoded));
-        console.log({
-            
-            'Authorization': 'Basic ' + (new Buffer(this.clientId + ':' + this.clientSecret).toString('base64')),
-            'Content-Type': 'application/x-www-form-urlencoded'
-            });
+        
         return this.http.post('https://accounts.spotify.com/api/token', querystring.stringify(formEncoded), {
             headers: {
             
@@ -66,13 +61,11 @@ export class SpotifyService implements OnModuleInit {
       return this.spotify_token;
     }
 
-    spotifyAutoComp(query: string) {
-        if(this.spotify_token === '') {
-            return {status: 'KO', error: 'MISSING_TOKEN'};
-        }
+    spotifyAutoComp(query: string, token: string) {
+        
         const reqOpts = {
             headers: {
-                'Authorization': 'Bearer ' + this.spotify_token
+                'Authorization': 'Bearer ' + token
             },                
         };
         return this.http.get('https://api.spotify.com/v1/search?q=' + query + "&type=artist&limit=5", reqOpts)
