@@ -58,7 +58,7 @@ export class SpotifyController {
                            })).subscribe((response) => {
                                
                                 this.spotifyService.storeSpotifyToken(response.access_token);
-                                res.redirect('http://localhost:4200/spotify');
+                                res.redirect('http://localhost:4200/spotify/store-token/' + response.access_token);
         });
 
     } else { // Case "token received"
