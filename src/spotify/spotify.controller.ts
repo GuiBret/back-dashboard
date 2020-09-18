@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { Controller, Get, Param, Query, Req, Res, Post } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res } from '@nestjs/common';
 import { SpotifyService } from './spotify.service';
 import * as fs from 'fs';
-import * as querystring from 'querystring';
 import { map } from 'rxjs/operators';
 
 
@@ -17,8 +16,8 @@ export class SpotifyController {
   
         if(this.spotifyService.spotifyToken !== '') {
         return {status: 'OK'}
-        } else {
-        return { status: 'KO'}
+        } else { // If the token is missing, we'll tell the user to login using this URL
+        return { status: 'KO', url: this.spotifyService.getUrl()}
         }
     }
 
@@ -31,18 +30,7 @@ export class SpotifyController {
             this.clientId = jsonContent.CLIENTID;
             this.clientSecret = jsonContent.CLIENTSECRET;
             
-            const redirectUri = 'http://localhost:3000/spotify/get-code';
-            const url = 'https://accounts.spotify.com/authorize?' + querystring.stringify({
-                'scope': 'user-read-private user-read-email',
-                'client_id': this.clientId,
-                'redirect_uri': redirectUri,
-                'response_type': 'code',
-            });
-
-            return {
-                'status': 'OK',
-                url: url
-            }
+     
         } else {
             return "";
         }
@@ -58,31 +46,26 @@ export class SpotifyController {
   @Get('get-code')
   getToken(@Query() query, @Res() res) {
     
+
+    // Case "Code received" => get token
     if(query.code) {
         const code = query.code;
-        if(this.clientId === '' || this.clientSecret === '') {
-            return {status: 'KO', error:'MISSING_CLIENT_OR_SECRET'};
-        }
+        
         this.spotifyService.getSpotifyToken(code, this.clientId, this.clientSecret)
                            .pipe(map((response) => {
-                               
-                               return response;
-                            
-                            
+                               return response.data;
+                        
                            })).subscribe((response) => {
-      
-            this.spotifyService.storeSpotifyToken(response.data.access_token);
-            res.redirect('http://localhost:4200/spotify');
+                               
+                                this.spotifyService.storeSpotifyToken(response.access_token);
+                                res.redirect('http://localhost:4200/spotify');
         });
 
-    } else {
+    } else { // Case "token received"
       
       this.spotifyService.storeSpotifyToken(query.access_token);
       
     }
-    // console.log(request);
-    
-
     
   }
 
