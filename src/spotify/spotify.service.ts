@@ -22,6 +22,9 @@ export class SpotifyService implements OnModuleInit {
         }
     } 
 
+    hasInformations() {
+        return this.clientId !== '' && this.clientSecret !== '';
+    }
     getUrl() {
         const redirectUri = 'http://localhost:3000/spotify/get-code';
         return 'https://accounts.spotify.com/authorize?' + querystring.stringify({
