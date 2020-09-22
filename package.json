@@ -28,6 +28,7 @@
     "@nestjs/platform-express": "^7.0.0",
     "@types/mongoose": "^5.7.36",
     "dotenv": "^8.2.0",
+    "form-urlencoded": "^4.2.1",
     "mongoose": "^5.10.3",
     "nestjs-easyconfig": "^2.0.5",
     "reflect-metadata": "^0.1.13",
@@ -35,6 +36,7 @@
     "rxjs": "^6.6.2"
   },
   "devDependencies": {
+    "@compodoc/compodoc": "^1.1.11",
     "@nestjs/cli": "^7.0.0",
     "@nestjs/schematics": "^7.0.0",
     "@nestjs/testing": "^7.0.0",
