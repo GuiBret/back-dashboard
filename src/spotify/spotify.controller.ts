@@ -3,6 +3,7 @@ import { Controller, Get, Param, Query, Res, Req, Headers } from '@nestjs/common
 import { SpotifyService } from './spotify.service';
 import * as fs from 'fs';
 import { map } from 'rxjs/operators';
+import { isFunction } from 'util';
 
 
 @Controller('spotify')
@@ -13,12 +14,14 @@ export class SpotifyController {
 
     @Get('precheck')
     spotifyPrecheck() {
-  
-        if(this.spotifyService.spotifyToken !== '') {
-        return {status: 'OK'}
-        } else { // If the token is missing, we'll tell the user to login using this URL
-        return { status: 'KO', url: this.spotifyService.getUrl()}
-        }
+      if(this.spotifyService.hasInformations()) {
+        return { status: 'KO', error: 'GET_TOKEN',url: this.spotifyService.getUrl()};
+
+      } else {
+        return { status: 'KO', message: 'MISSING_CLIENT_OR_SECRET'};
+      }
+
+        
     }
 
     // TODO : déplacer les données dans le service
@@ -64,6 +67,7 @@ export class SpotifyController {
                            })).subscribe((response) => {
                                
                                 this.spotifyService.storeSpotifyToken(response.access_token);
+                                console.log(response);
                                 res.redirect('http://localhost:4200/spotify/store-token/' + response.access_token);
         });
 
@@ -75,4 +79,9 @@ export class SpotifyController {
     
   }
 
+  @Get('artist/:id')
+  getArtistFromSpotify(@Param('id') artistId) {
+    console.log(artistId);
+    // this.spotifyService.getArtistInfo()
+  }
 }
