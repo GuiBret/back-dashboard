@@ -12,22 +12,15 @@ export class SpotifyService implements OnModuleInit {
     
     constructor(private http: HttpService) {}
 
-    /**
-     * Launched on module init, searches and stores the content of the configuration file
-     */
     onModuleInit() {
         const content: any = JSON.parse(fs.readFileSync('./config/spotify/spotify.conf').toString());
-        
+        console.log(content);
         if(content) {
             this.clientId = content.CLIENTID;
             this.clientSecret = content.CLIENTSECRET;
             console.log(this.clientId);
         }
     } 
-
-    hasInformations() {
-        return this.clientId !== '' && this.clientSecret !== '';
-    }
 
     getUrl() {
         const redirectUri = 'http://localhost:3000/spotify/get-code';
