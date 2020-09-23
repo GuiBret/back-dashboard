@@ -80,8 +80,12 @@ export class SpotifyController {
 
   @Get('refresh-token/:refresh')
   getRefreshedToken(@Param('refresh') refreshToken: string) {
-    return this.spotifyService.getNewAccessToken(refreshToken).pipe(map((response) => {
-      return response.data;
+    return this.spotifyService.getNewAccessToken(refreshToken).pipe(map((response: any) => {
+      
+      const pushedData = {
+        token: response.data.access_token
+      };
+      return pushedData;
     }));
   }
 
