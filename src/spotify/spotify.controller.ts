@@ -78,9 +78,16 @@ export class SpotifyController {
     
   }
 
+  @Get('refresh-token/:refresh')
+  getRefreshedToken(@Param('refresh') refreshToken: string) {
+    return this.spotifyService.getNewAccessToken(refreshToken).pipe(map((response) => {
+      return response.data;
+    }));
+  }
+
   @Get('artist/:id')
   getArtistFromSpotify(@Param('id') artistId) {
-    console.log(artistId);
+    
     // this.spotifyService.getArtistInfo()
   }
 }

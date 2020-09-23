@@ -1,9 +1,10 @@
-import { Injectable, HttpService, OnModuleInit } from '@nestjs/common';
+import { Injectable, HttpService, OnModuleInit, HttpException, HttpStatus } from '@nestjs/common';
 import * as querystring from 'querystring';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { SpotifySearchResponse } from 'src/models/spotify-search-response.interface';
 import { SpotifyArtist } from 'src/models/spotify-artist.interface';
 import * as fs from 'fs';
+import { query } from 'express';
 @Injectable()
 export class SpotifyService implements OnModuleInit {
     spotify_token = "";
@@ -18,7 +19,7 @@ export class SpotifyService implements OnModuleInit {
         if(content) {
             this.clientId = content.CLIENTID;
             this.clientSecret = content.CLIENTSECRET;
-            console.log(this.clientId);
+            
         }
     } 
 
@@ -48,7 +49,7 @@ export class SpotifyService implements OnModuleInit {
         return this.http.post('https://accounts.spotify.com/api/token', querystring.stringify(formEncoded), {
             headers: {
             
-            'Authorization': 'Basic ' + (new Buffer(this.clientId + ':' + this.clientSecret).toString('base64')),
+            'Authorization': 'Basic ' + this.generateBase64Hash(),
             'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
@@ -71,7 +72,9 @@ export class SpotifyService implements OnModuleInit {
                 'Authorization': 'Bearer ' + token
             },                
         };
-        return this.http.get('https://api.spotify.com/v1/search?q=' + query + "&type=artist&limit=5", reqOpts)
+
+        
+        return this.http.get(`https://api.spotify.com/v1/search?q=${query}&type=artist&limit=5`, reqOpts)
                         .pipe(map((response: {data: SpotifySearchResponse}) => {
 
                             const artists : Array<SpotifyArtist>= response.data.artists.items;
@@ -90,5 +93,39 @@ export class SpotifyService implements OnModuleInit {
                             };
                             
                         }));
+    }
+
+
+    /**
+     * Calls Spotify's endpoint delivering a new token from a refresh
+     * @param refreshToken The refresh token
+     */
+    getNewAccessToken(refreshToken: string) {
+
+        const formEncoded = {
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken
+        };
+
+        const reqOpts = {
+            headers: {
+                'Authorization': 'Basic ' + this.generateBase64Hash()
+            }
+        }
+        
+        return this.http.post('https://accounts.spotify.com/api/token', querystring.stringify(formEncoded), reqOpts)
+                        .pipe(
+                        catchError((error) => {
+                            
+                            throw new HttpException({status: 'KO', error: 'INVALID_REFRESH', message: 'Invalid refresh token'}, HttpStatus.FORBIDDEN);
+                        })
+                        );
+    }
+
+    /**
+     * Generates a hash in base 64 of clientId:clientSecret, used in login procedures
+     */
+    private generateBase64Hash() {
+        return (new Buffer(this.clientId + ':' + this.clientSecret).toString('base64'));
     }
 }
