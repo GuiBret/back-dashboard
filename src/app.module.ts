@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EasyconfigModule } from 'nestjs-easyconfig';
 import { MongooseModule } from '@nestjs/mongoose';
-import { TodoMongoose, Todo } from 'backend/models/todo.schema';
+import { TodoMongoose, Todo } from '@models/todos/todo.schema';
 import { SpotifyController } from './spotify/spotify.controller';
 import { SpotifyService } from './spotify/spotify.service';
 

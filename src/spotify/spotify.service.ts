@@ -4,14 +4,15 @@ import { map, catchError } from 'rxjs/operators';
 import { SpotifySearchResponse } from 'src/models/spotify-search-response.interface';
 import { SpotifyArtist } from 'src/models/spotify-artist.interface';
 import * as fs from 'fs';
-import { query } from 'express';
+import { EasyconfigService } from 'nestjs-easyconfig';
+
 @Injectable()
 export class SpotifyService implements OnModuleInit {
     spotify_token = "";
     clientId = "";
     clientSecret = "";
     
-    constructor(private http: HttpService) {}
+    constructor(private http: HttpService, private ecs: EasyconfigService) {}
 
     onModuleInit() {
         const content: any = JSON.parse(fs.readFileSync('./config/spotify/spotify.conf').toString());
@@ -27,7 +28,7 @@ export class SpotifyService implements OnModuleInit {
         return this.clientId !== '' && this.clientSecret !== '';
     }
     getUrl() {
-        const redirectUri = 'http://localhost:3000/spotify/get-code';
+        const redirectUri = this.ecs.get('SERVER_ROOT') + '/spotify/get-code';
         return 'https://accounts.spotify.com/authorize?' + querystring.stringify({
             'scope': 'user-read-private user-read-email',
             'client_id': this.clientId,
@@ -41,7 +42,7 @@ export class SpotifyService implements OnModuleInit {
     // const form = new FormData();
         const formEncoded = {
             code: code,
-            redirect_uri: 'http://localhost:3000/spotify/get-code',
+            redirect_uri: this.ecs.get('SERVER_ROOT') + '/spotify/get-code',
             grant_type: "authorization_code"
         };
         

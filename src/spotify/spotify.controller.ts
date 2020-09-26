@@ -3,14 +3,14 @@ import { Controller, Get, Param, Query, Res, Req, Headers } from '@nestjs/common
 import { SpotifyService } from './spotify.service';
 import * as fs from 'fs';
 import { map } from 'rxjs/operators';
-import { isFunction } from 'util';
+import { EasyconfigService } from 'nestjs-easyconfig';
 
 
 @Controller('spotify')
 export class SpotifyController {
     clientId = '';
     clientSecret = '';
-    constructor(private spotifyService: SpotifyService) {}
+    constructor(private spotifyService: SpotifyService, private ecs: EasyconfigService) {}
 
     @Get('precheck')
     spotifyPrecheck() {
@@ -26,12 +26,15 @@ export class SpotifyController {
 
     // TODO : déplacer les données dans le service
     @Get('get-url')
-    getSpotifyUrl() {
+    getSpotifyUrl(@Headers('referer') referer) {
+        console.log(referer);
         const content = fs.readFileSync('./config/spotify/spotify.conf').toString();
         if(content) {
             const jsonContent = JSON.parse(content);
-            this.clientId = jsonContent.CLIENTID;
-            this.clientSecret = jsonContent.CLIENTSECRET;
+          
+            return {
+              url: this.spotifyService.getUrl()
+            }
             
      
         } else {
@@ -67,7 +70,7 @@ export class SpotifyController {
                            })).subscribe((response) => {
                                
                                 this.spotifyService.storeSpotifyToken(response.access_token);
-                                res.redirect('http://localhost:4200/spotify/store-token/' + response.access_token + '/' + response.refresh_token);
+                                res.redirect(this.ecs.get('APP_LOCATION') + '/spotify/store-token/' + response.access_token + '/' + response.refresh_token);
         });
 
     } else { // Case "token received"

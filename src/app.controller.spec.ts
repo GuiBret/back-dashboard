@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 
 describe('AppController', () => {
   let appController: AppController;
+  let appServiceStub: Partial<AppService>;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -14,9 +15,4 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
-  });
 });
