@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Controller, Get, Post, Req, Request, Param, Delete, Put, Query, Res } from '@nestjs/common';
 import { AppService } from './app.service';
-import { TodoMongoose } from 'backend/models/todo.schema';
+import { TodoMongoose } from '@models/todos/todo.schema';
 import * as mongoose from 'mongoose';
-import * as fs from 'fs';
-import * as querystring from 'querystring';
+
 
 @Controller()
 export class AppController {

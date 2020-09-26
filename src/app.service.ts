@@ -1,9 +1,10 @@
 import { Injectable, OnModuleInit, HttpServer, HttpService } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { TodoMongoose } from 'backend/models/todo.schema';
+import { TodoMongoose } from '@models/todos/todo.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Observable, observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import * as mongoose from 'mongoose';
+
 
 @Injectable()
 export class AppService {
