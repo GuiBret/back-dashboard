@@ -30,7 +30,7 @@ export class SpotifyService implements OnModuleInit {
     getUrl() {
         const redirectUri = this.ecs.get('SERVER_ROOT') + '/spotify/get-code';
         return 'https://accounts.spotify.com/authorize?' + querystring.stringify({
-            'scope': 'user-read-private user-read-email',
+            'scope': 'user-read-private user-read-email user-modify-playback-state',
             'client_id': this.clientId,
             'redirect_uri': redirectUri,
             'response_type': 'code',
@@ -84,7 +84,8 @@ export class SpotifyService implements OnModuleInit {
                                 return {
                                     id: artist.id,
                                     imageUrl: lastImageUrl,
-                                    name: artist.name
+                                    name: artist.name,
+                                    uri: artist.uri
                                 };
                             });
 
@@ -128,5 +129,18 @@ export class SpotifyService implements OnModuleInit {
      */
     private generateBase64Hash() {
         return (new Buffer(this.clientId + ':' + this.clientSecret).toString('base64'));
+    }
+
+    getUserInfo(token: string) {
+        const reqOpts = {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        };
+
+        return this.http.get('https://api.spotify.com/v1/me', reqOpts).pipe(map((response) => {
+            return response.data;
+        }));
+
     }
 }
