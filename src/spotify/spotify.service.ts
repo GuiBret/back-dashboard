@@ -79,20 +79,36 @@ export class SpotifyService implements OnModuleInit {
                         .pipe(map((response: {data: SpotifySearchResponse}) => {
 
                             const artists : Array<SpotifyArtist>= response.data.artists.items;
-                            const artistsFiltered = artists.map((artist) => {
-                                const lastImageUrl = artist.images[artist.images.length - 1].url;
-                                return {
-                                    id: artist.id,
-                                    imageUrl: lastImageUrl,
-                                    name: artist.name,
-                                    uri: artist.uri
-                                };
-                            });
+                            console.log(artists);
 
-                            return {
-                                status: 'OK',
-                                data: artistsFiltered
-                            };
+                            if(artists.length === 0) {
+                                return {
+                                    status: 'KO',
+                                    error: 'NO_RECORDS_FOUND',
+                                    data: {}
+                                }
+                            } else {
+                                const artistsFiltered = artists.map((artist) => {
+                                    let lastImageUrl = '';
+                                    if(artist.images.length !== 0) {
+                                        lastImageUrl = artist.images[artist.images.length - 1].url;
+
+                                    }
+                                    return {
+                                        id: artist.id,
+                                        imageUrl: lastImageUrl,
+                                        name: artist.name,
+                                        uri: artist.uri
+                                    };
+                                });
+    
+                                return {
+                                    status: 'OK',
+                                    data: artistsFiltered
+                                };
+
+                            }
+                            
                             
                         }));
     }
