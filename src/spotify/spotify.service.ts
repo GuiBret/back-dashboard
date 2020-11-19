@@ -30,7 +30,7 @@ export class SpotifyService implements OnModuleInit {
     getUrl() {
         const redirectUri = this.ecs.get('SERVER_ROOT') + '/spotify/get-code';
         return 'https://accounts.spotify.com/authorize?' + querystring.stringify({
-            'scope': 'user-read-private user-read-email user-modify-playback-state',
+            'scope': 'user-read-private user-read-email user-read-playback-state user-modify-playback-state',
             'client_id': this.clientId,
             'redirect_uri': redirectUri,
             'response_type': 'code',
@@ -66,7 +66,7 @@ export class SpotifyService implements OnModuleInit {
       return this.spotify_token;
     }
 
-    spotifyAutoComp(query: string, token: string) {
+    spotifyAutoComp(query: string, token: string, typeParams: string) {
         
         const reqOpts = {
             headers: {
@@ -75,11 +75,12 @@ export class SpotifyService implements OnModuleInit {
         };
 
         
-        return this.http.get(`https://api.spotify.com/v1/search?q=${query}&type=artist&limit=5`, reqOpts)
+        
+        return this.http.get(`https://api.spotify.com/v1/search?q=${query}&type=${typeParams}&limit=5`, reqOpts)
                         .pipe(map((response: {data: SpotifySearchResponse}) => {
 
                             const artists : Array<SpotifyArtist>= response.data.artists.items;
-                            console.log(artists);
+                            
 
                             if(artists.length === 0) {
                                 return {

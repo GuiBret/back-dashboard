@@ -44,14 +44,16 @@ export class SpotifyController {
     }
 
   @Get('autocomp/:query')
-  q(@Param() params, @Headers('Authorization') authHeader) {
+  q(@Param() params, @Headers('Authorization') authHeader, @Req() req) {
     const queryStr = params.query;
+    const typeParams = req.query.type;
     
     if(!authHeader) {
       return {status: 'KO', error: 'MISSING_TOKEN'};
     } else {
       const token = authHeader.split(' ')[1];
-      return this.spotifyService.spotifyAutoComp(queryStr, token);
+
+      return this.spotifyService.spotifyAutoComp(queryStr, token, typeParams);
     }
     
   }
@@ -96,5 +98,12 @@ export class SpotifyController {
   getArtistFromSpotify(@Param('id') artistId) {
     
     // this.spotifyService.getArtistInfo()
+  }
+
+  @Get('my-info')
+  getUserInfo(@Headers('Authorization') authHeader) {
+    const token = authHeader.split(' ')[1];
+    return this.spotifyService.getUserInfo(token);
+
   }
 }
