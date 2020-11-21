@@ -5,6 +5,7 @@ import { SpotifySearchResponse } from 'src/models/spotify-search-response.interf
 import { SpotifyArtist } from 'src/models/spotify-artist.interface';
 import * as fs from 'fs';
 import { EasyconfigService } from 'nestjs-easyconfig';
+import { response } from 'express';
 
 @Injectable()
 export class SpotifyService implements OnModuleInit {
@@ -79,33 +80,38 @@ export class SpotifyService implements OnModuleInit {
         
         return this.http.get(`https://api.spotify.com/v1/search?q=${query}&type=${typeParams}&limit=5`, reqOpts)
                         .pipe(map((response: {data: SpotifySearchResponse}) => {
-                            let responseData = [];
-                            const artists : Array<SpotifyArtist>= response.data.artists.items;
+                            const responseData = [];
+
+                            if(response.data.artists) {
+                                const artists : Array<SpotifyArtist> = response.data.artists.items;
+
+                                if(artists.length === 0) {
+                                    return {
+                                        status: 'KO',
+                                        error: 'NO_RECORDS_FOUND',
+                                        data: {}
+                                    }
+                                } else {
+                                    const artistsFiltered = artists.map(this.generateArtistElement.bind(this));
+                                    responseData.push(...artistsFiltered);
+                                    
+    
+                                }
+                            }
                             if(response.data.tracks) {
                                 
                                 const tracks: Array<any> = response.data.tracks.items;
                                 const tracksFiltered : Array<any> = tracks.map(this.generateTrackElement.bind(this));
-                                responseData = [...tracksFiltered];
+                                responseData.push(...tracksFiltered);
                             }
 
 
+                            return {
+                                status: 'OK',
+                                data: responseData
+                            };
 
-                            if(artists.length === 0) {
-                                return {
-                                    status: 'KO',
-                                    error: 'NO_RECORDS_FOUND',
-                                    data: {}
-                                }
-                            } else {
-                                const artistsFiltered = artists.map(this.generateArtistElement.bind(this));
-                                responseData.push(...artistsFiltered);
-                                return {
-                                    status: 'OK',
-                                    data: responseData
-                                };
-                                
-
-                            }
+                            
                             
                             
                         }));
@@ -121,7 +127,8 @@ export class SpotifyService implements OnModuleInit {
             id: artist.id,
             imageUrl: lastImageUrl,
             name: artist.name,
-            uri: artist.uri
+            uri: artist.uri,
+            type: 'artist'
         };
     }
     
@@ -140,7 +147,8 @@ export class SpotifyService implements OnModuleInit {
             id: track.id,
             imageUrl: lastImageUrl,
             name: track.name,
-            uri: track.uri
+            uri: track.uri,
+            type: 'track'
         }
     }
 
