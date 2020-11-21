@@ -98,11 +98,22 @@ export class SpotifyService implements OnModuleInit {
     
                                 }
                             }
+
+                            
                             if(response.data.tracks) {
                                 
                                 const tracks: Array<any> = response.data.tracks.items;
                                 const tracksFiltered : Array<any> = tracks.map(this.generateTrackElement.bind(this));
                                 responseData.push(...tracksFiltered);
+                            }
+
+                            if(response.data.albums) {
+                                
+                                if(response.data.albums.length !== 0) {
+                                    const albums: Array<any> = response.data.albums.items;
+                                    const albumsFiltered : Array<any> = albums.map(this.generateAlbumElement.bind(this));
+                                    responseData.push(...albumsFiltered);
+                                }
                             }
 
 
@@ -136,7 +147,7 @@ export class SpotifyService implements OnModuleInit {
 
     private generateTrackElement(track: any) {
         
-        console.log(track);
+        
         let lastImageUrl = '';
         if(track.album.images.length !== 0) {
             lastImageUrl = track.album.images[track.album.images.length - 1].url;
@@ -149,6 +160,24 @@ export class SpotifyService implements OnModuleInit {
             name: track.name,
             uri: track.uri,
             type: 'track'
+        }
+    }
+
+    private generateAlbumElement(album: any) {
+
+        
+        let lastImageUrl = '';
+        if(album.images.length !== 0) {
+            lastImageUrl = album.images[album.images.length - 1].url;
+
+        }
+
+        return {
+            id: album.id,
+            imageUrl: lastImageUrl,
+            name: album.name,
+            uri: album.uri,
+            type: 'album'
         }
     }
 
