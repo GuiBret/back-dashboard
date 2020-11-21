@@ -14,7 +14,7 @@ export class SpotifyService implements OnModuleInit {
     
     constructor(private http: HttpService, private ecs: EasyconfigService) {}
 
-    onModuleInit() {
+    onModuleInit(): void {
         const content: any = JSON.parse(fs.readFileSync('./config/spotify/spotify.conf').toString());
         console.log(content);
         if(content) {
@@ -24,7 +24,8 @@ export class SpotifyService implements OnModuleInit {
         }
     } 
 
-    hasInformations() {
+    
+    hasInformations(): boolean {
         return this.clientId !== '' && this.clientSecret !== '';
     }
     getUrl() {
@@ -78,9 +79,16 @@ export class SpotifyService implements OnModuleInit {
         
         return this.http.get(`https://api.spotify.com/v1/search?q=${query}&type=${typeParams}&limit=5`, reqOpts)
                         .pipe(map((response: {data: SpotifySearchResponse}) => {
-
+                            let responseData = [];
                             const artists : Array<SpotifyArtist>= response.data.artists.items;
-                            
+                            if(response.data.tracks) {
+                                
+                                const tracks: Array<any> = response.data.tracks.items;
+                                const tracksFiltered : Array<any> = tracks.map(this.generateTrackElement.bind(this));
+                                responseData = [...tracksFiltered];
+                            }
+
+
 
                             if(artists.length === 0) {
                                 return {
@@ -89,29 +97,51 @@ export class SpotifyService implements OnModuleInit {
                                     data: {}
                                 }
                             } else {
-                                const artistsFiltered = artists.map((artist) => {
-                                    let lastImageUrl = '';
-                                    if(artist.images.length !== 0) {
-                                        lastImageUrl = artist.images[artist.images.length - 1].url;
-
-                                    }
-                                    return {
-                                        id: artist.id,
-                                        imageUrl: lastImageUrl,
-                                        name: artist.name,
-                                        uri: artist.uri
-                                    };
-                                });
-    
+                                const artistsFiltered = artists.map(this.generateArtistElement.bind(this));
+                                responseData.push(...artistsFiltered);
                                 return {
                                     status: 'OK',
-                                    data: artistsFiltered
+                                    data: responseData
                                 };
+                                
 
                             }
                             
                             
                         }));
+    }
+
+    private generateArtistElement(artist: any) {
+        let lastImageUrl = '';
+        if(artist.images.length !== 0) {
+            lastImageUrl = artist.images[artist.images.length - 1].url;
+
+        }
+        return {
+            id: artist.id,
+            imageUrl: lastImageUrl,
+            name: artist.name,
+            uri: artist.uri
+        };
+    }
+    
+
+
+    private generateTrackElement(track: any) {
+        
+        console.log(track);
+        let lastImageUrl = '';
+        if(track.album.images.length !== 0) {
+            lastImageUrl = track.album.images[track.album.images.length - 1].url;
+
+        }
+
+        return {
+            id: track.id,
+            imageUrl: lastImageUrl,
+            name: track.name,
+            uri: track.uri
+        }
     }
 
 
