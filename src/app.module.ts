@@ -7,6 +7,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TodoMongoose, Todo } from '@models/todos/todo.schema';
 import { SpotifyController } from './spotify/spotify.controller';
 import { SpotifyService } from './spotify/spotify.service';
+import { GmailService } from './gmail/gmail.service';
+import { GmailController } from './gmail/gmail.controller';
 
 require('dotenv').config();
 
@@ -19,7 +21,7 @@ require('dotenv').config();
   HttpModule,
   
   ],
-  controllers: [AppController, SpotifyController],
-  providers: [AppService, SpotifyService],
+  controllers: [AppController, SpotifyController, GmailController],
+  providers: [AppService, SpotifyService, GmailService],
 })
 export class AppModule {}
