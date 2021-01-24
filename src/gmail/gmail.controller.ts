@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { Controller, Get, Param, Query, Res, Req, Headers } from '@nestjs/common';
-// import { SpotifyService } from './spotify.service';
+import { Controller, Get, Query, Res } from '@nestjs/common';
+import { EasyconfigService } from 'nestjs-easyconfig';
 import { GmailService } from './gmail.service';
 
 
 @Controller('gmail')
 export class GmailController {
     
-    constructor(private gmailService: GmailService) {
+    constructor(private gmailService: GmailService, private ecs: EasyconfigService) {
         
     }
 
@@ -24,8 +24,8 @@ export class GmailController {
     @Get('get-code')
     getAuthCode(@Query() query, @Res() res) {
         this.gmailService.getToken(query.code).then((tokenObj: {access_token: string, expiry_date: number}) => {
-            console.log(tokenObj);
-            res.redirect('http://localhost:4200/gmail/store-token/' + tokenObj.access_token + '/' + tokenObj.expiry_date);
+
+            res.redirect(this.ecs.get('APP_LOCATION') + '/gmail/store-token/' + tokenObj.access_token + '/' + tokenObj.expiry_date);
         });
         
     }

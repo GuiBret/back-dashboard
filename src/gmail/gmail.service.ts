@@ -1,11 +1,7 @@
-import { Injectable, HttpService, OnModuleInit, HttpException, HttpStatus } from '@nestjs/common';
-import { response } from 'express';
-
+import { Injectable, HttpService, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 import { google } from 'googleapis';
-import { oauth2 } from 'googleapis/build/src/apis/oauth2';
-import { resolve } from 'path';
-
+import { EasyconfigService } from 'nestjs-easyconfig';
 
 
 @Injectable()
@@ -14,43 +10,41 @@ export class GmailService implements OnModuleInit {
     clientId = "";
     clientSecret = "";
     
-    constructor(private http: HttpService) {}
+    constructor(private http: HttpService, private ecs: EasyconfigService) {}
 
     onModuleInit(): void {
         try {
             
-            const credentials = JSON.parse(fs.readFileSync('./src/gmail/private/credentials.json').toString());
-        
+            const credentials = JSON.parse(fs.readFileSync('./config/gmail/credentials.json').toString());
+            
             this.clientId = credentials.web.client_id;
             this.clientSecret = credentials.web.client_secret;
 
-        } catch(error) {
+        } catch(error) {       
             // TODO: Handle error
         }
     } 
 
-    handleGmailLogin() {
-        const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, 'http://localhost:4500/gmail/get-code');
+    handleGmailLogin(): string {  
+        const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/get-code');
         
         const authUrl = oauth2Client.generateAuthUrl({
             access_type: 'offline',
-            scope: ['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.modify']
+            scope: ['https://www.googleapis.com/auth/gmail.readonly', 'https://mail.google.com/']
         });
         return authUrl;
-    }
+       }
 
     getToken(code: string) {
 
         return new Promise((resolve, reject) => {
-            const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, 'http://localhost:4500/gmail/get-code');
+            const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/get-code');
 
             oauth2Client.getToken(code, (err, token) => {
                 
                 resolve(token);
             });
-
         })
-        
     }
 
 }
