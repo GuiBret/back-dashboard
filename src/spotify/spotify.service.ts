@@ -205,7 +205,7 @@ export class SpotifyService implements OnModuleInit {
                             
                             throw new HttpException({status: 'KO', error: 'INVALID_REFRESH', message: 'Invalid refresh token'}, HttpStatus.FORBIDDEN);
                         })
-                        );
+        );
     }
 
     /**
