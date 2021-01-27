@@ -38,4 +38,4 @@ documentation/**
 
 config/spotify/spotify.conf
 src/models/spotify-artist.interface.ts
-src/gmail/private/*
+config/gmail/credentials.json
