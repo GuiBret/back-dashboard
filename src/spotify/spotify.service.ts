@@ -1,8 +1,8 @@
 import { Injectable, HttpService, OnModuleInit, HttpException, HttpStatus } from '@nestjs/common';
 import * as querystring from 'querystring';
 import { map, catchError } from 'rxjs/operators';
-import { SpotifySearchResponse } from 'src/models/spotify-search-response.interface';
-import { SpotifyArtist } from 'src/models/spotify-artist.interface';
+import { SpotifySearchResponse } from '@models/spotify-search-response.interface';
+import { SpotifyArtist } from '@models/spotify-artist.interface';
 import * as fs from 'fs';
 import { EasyconfigService } from 'nestjs-easyconfig';
 import { response } from 'express';
