@@ -12,7 +12,7 @@ export class SpotifyController {
     clientSecret = '';
     constructor(private spotifyService: SpotifyService, private ecs: EasyconfigService) {}
 
-    @Get('precheck')
+    @Get('auth/precheck')
     spotifyPrecheck() {
       if(this.spotifyService.hasInformations()) {
         return { status: 'KO', error: 'GET_TOKEN',url: this.spotifyService.getUrl()};
@@ -25,7 +25,7 @@ export class SpotifyController {
     }
 
     // TODO : déplacer les données dans le service
-    @Get('get-url')
+    @Get('auth/url')
     getSpotifyUrl(@Headers('referer') referer) {
         console.log(referer);
         const content = fs.readFileSync('./config/spotify/spotify.conf').toString();
@@ -43,7 +43,7 @@ export class SpotifyController {
 
     }
 
-  @Get('autocomp/:query')
+  @Get('search/:query')
   q(@Param() params, @Headers('Authorization') authHeader, @Req() req) {
     const queryStr = params.query;
     const typeParams = req.query.type;
@@ -57,7 +57,7 @@ export class SpotifyController {
     }
     
   }
-  @Get('get-code')
+  @Get('auth/code')
   getToken(@Query() query, @Res() res) {
     
 
@@ -83,7 +83,7 @@ export class SpotifyController {
     
   }
 
-  @Get('refresh-token/:refresh')
+  @Get('auth/refresh/:refresh')
   getRefreshedToken(@Param('refresh') refreshToken: string) {
     return this.spotifyService.getNewAccessToken(refreshToken).pipe(map((response: any) => {
       
@@ -94,7 +94,7 @@ export class SpotifyController {
     }));
   }
 
-  @Get('artist/:id')
+  @Get('artists/:id')
   getArtistFromSpotify(@Param('id') artistId) {
     
     // this.spotifyService.getArtistInfo()
