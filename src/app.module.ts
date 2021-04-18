@@ -4,14 +4,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EasyconfigModule } from 'nestjs-easyconfig';
 import { MongooseModule } from '@nestjs/mongoose';
-import { TodoMongoose, Todo } from '@models/todos/todo.schema';
+import { Todo, TodoSchema } from '@models/todos/todo.schema';
 import { SpotifyController } from './spotify/spotify.controller';
 import { SpotifyService } from './spotify/spotify.service';
 import { GmailService } from './gmail/gmail.service';
 import { GmailController } from './gmail/gmail.controller';
-import { ConfigModule } from '@nestjs/config';
 
-import configuration from '../config/configuration';
+
 
 require('dotenv').config();
 
@@ -20,11 +19,8 @@ require('dotenv').config();
     path: './.env'
   }),
   MongooseModule.forRoot("mongodb+srv://" + process.env.DATABASE_USERNAME + ":" + process.env.DATABASE_PASSWORD + "@" + process.env.DATABASE_HOST),
-  MongooseModule.forFeature([{name: TodoMongoose.name, schema: Todo}]),
+  MongooseModule.forFeature([{name: Todo.name, schema: TodoSchema}]),
   HttpModule,
-  ConfigModule.forRoot({
-    load: [configuration]
-  })
   
   ],
   controllers: [AppController, SpotifyController, GmailController],

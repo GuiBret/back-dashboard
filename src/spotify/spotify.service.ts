@@ -17,7 +17,7 @@ export class SpotifyService implements OnModuleInit {
 
     onModuleInit(): void {
         const content: any = JSON.parse(fs.readFileSync('./config/spotify/spotify.conf').toString());
-        console.log(content);
+        
         if(content) {
             this.clientId = content.CLIENTID;
             this.clientSecret = content.CLIENTSECRET;
@@ -32,7 +32,7 @@ export class SpotifyService implements OnModuleInit {
     getUrl() {
         const redirectUri = this.ecs.get('SERVER_ROOT') + '/spotify/get-code';
         return 'https://accounts.spotify.com/authorize?' + querystring.stringify({
-            'scope': 'user-read-private user-read-email user-read-playback-state user-modify-playback-state',
+            'scope': 'user-read-private user-read-email user-read-playback-state user-modify-playback-state streaming',
             'client_id': this.clientId,
             'redirect_uri': redirectUri,
             'response_type': 'code',

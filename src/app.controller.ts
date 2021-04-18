@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Controller, Get, Post, Req, Request, Param, Delete, Put, Query, Res } from '@nestjs/common';
 import { AppService } from './app.service';
-import { TodoMongoose } from '@models/todos/todo.schema';
+import { TodoDocument } from '@models/todos/todo.schema';
 import * as mongoose from 'mongoose';
 
 
@@ -31,7 +31,7 @@ export class AppController {
     
     const form : any = request.body;
     const idTodo: string = params.idtodo;
-    const todoData : TodoMongoose = form.todo;
+    const todoData : TodoDocument = form.todo;
     todoData._id = mongoose.Types.ObjectId(idTodo);
     return this.appService.editTodo(idTodo, todoData);
     
@@ -42,7 +42,7 @@ export class AppController {
   addTodo(@Req() request: Request) {
     const form : any = request.body;
     
-    const todoData : TodoMongoose = form.todo;
+    const todoData : TodoDocument = form.todo;
     todoData._id = mongoose.Types.ObjectId();
     return this.appService.addTodo(todoData);
   }

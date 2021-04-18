@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit, HttpServer, HttpService } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { TodoMongoose } from '@models/todos/todo.schema';
+import { Todo, TodoDocument } from '@models/todos/todo.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Observable } from 'rxjs';
 import * as mongoose from 'mongoose';
@@ -12,7 +12,7 @@ export class AppService {
   clientSecret = "";
   spotify_token = '';
 
-  constructor(@InjectModel(TodoMongoose.name) private todoModel: Model<TodoMongoose>, private http: HttpService) {
+  constructor(@InjectModel(Todo.name) private todoModel: Model<TodoDocument>, private http: HttpService) {
     
     
   }
@@ -29,18 +29,16 @@ export class AppService {
      
   }
 
-  addTodo(todoToAdd: TodoMongoose) {
+  addTodo(todoToAdd: TodoDocument) : Promise<{status: string, newList: Array<any>}> {
     return new Promise(async (resolve, reject) => {
       const todo = await this.todoModel.create(todoToAdd);
-
-      console.log(todo);
 
       resolve({status: 'OK', newList: await this.getTodos()});
     })
     
   }
 
-  saveTodos(todoListToAdd: Array<TodoMongoose>): Observable<any>{
+  saveTodos(todoListToAdd: Array<TodoDocument>): Observable<any>{
 
     return new Observable((observer) => {
       
@@ -59,7 +57,7 @@ export class AppService {
     
   }
 
-  editTodo(idTodo: string, todo: TodoMongoose) {
+  editTodo(idTodo: string, todo: TodoDocument) {
 
     return new Promise(async (resolve, reject) => {
 
