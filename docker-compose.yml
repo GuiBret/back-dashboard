@@ -6,6 +6,5 @@ services:
       - "5000:4500"
     command: npm run start:prod
     volumes:
-      - ./config/configuration.ts:/config/configuration.ts
       - ./config:/app/config
       - ./.env:/app/.env

@@ -29,6 +29,4 @@ RUN npm install -g pm2
 
 EXPOSE 5000
 
-# CMD ["npm", "run", "start:prod"]
-
-CMD ["sleep", "1d"]
+CMD ["npm", "run", "start:prod"]
