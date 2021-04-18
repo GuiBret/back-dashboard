@@ -12,7 +12,7 @@ export class GmailController {
     }
 
 
-    @Get('get-url') 
+    @Get('auth/url') 
     testLogin() {
 
         const response = {
@@ -21,7 +21,7 @@ export class GmailController {
         return response;
     }
 
-    @Get('get-code')
+    @Get('auth/code')
     getAuthCode(@Query() query, @Res() res) {
         this.gmailService.getToken(query.code).then((tokenObj: {access_token: string, expiry_date: number}) => {
 
