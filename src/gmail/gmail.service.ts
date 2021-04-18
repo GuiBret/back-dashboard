@@ -26,7 +26,7 @@ export class GmailService implements OnModuleInit {
     } 
 
     handleGmailLogin(): string {  
-        const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/get-code');
+        const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/auth/code');
         
         const authUrl = oauth2Client.generateAuthUrl({
             access_type: 'offline',
@@ -38,7 +38,7 @@ export class GmailService implements OnModuleInit {
     getToken(code: string) {
 
         return new Promise((resolve, reject) => {
-            const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/get-code');
+            const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/auth/code');
 
             oauth2Client.getToken(code, (err, token) => {
                 

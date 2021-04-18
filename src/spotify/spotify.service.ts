@@ -30,7 +30,7 @@ export class SpotifyService implements OnModuleInit {
         return this.clientId !== '' && this.clientSecret !== '';
     }
     getUrl() {
-        const redirectUri = this.ecs.get('SERVER_ROOT') + '/spotify/get-code';
+        const redirectUri = this.ecs.get('SERVER_ROOT') + '/spotify/auth/code';
         return 'https://accounts.spotify.com/authorize?' + querystring.stringify({
             'scope': 'user-read-private user-read-email user-read-playback-state user-modify-playback-state streaming',
             'client_id': this.clientId,
@@ -44,7 +44,7 @@ export class SpotifyService implements OnModuleInit {
     // const form = new FormData();
         const formEncoded = {
             code: code,
-            redirect_uri: this.ecs.get('SERVER_ROOT') + '/spotify/get-code',
+            redirect_uri: this.ecs.get('SERVER_ROOT') + '/spotify/auth/code',
             grant_type: "authorization_code"
         };
         
