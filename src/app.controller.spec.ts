@@ -5,8 +5,7 @@ import { AppService } from './app.service';
 describe('AppController', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let appController: AppController;
-  // tslint:disable-next-line: prefer-const
-  let appServiceStub: Partial<AppService>;
+  const appServiceStub: Partial<AppService> = {};
 
   beforeEach(async() => {
     const app: TestingModule = await Test.createTestingModule({
@@ -17,6 +16,10 @@ describe('AppController', () => {
     }).compile();
 
     appController = app.get<AppController>(AppController);
+  });
+
+  it('should exist', () => {
+    expect(appController).toBeTruthy();
   });
 
 });
