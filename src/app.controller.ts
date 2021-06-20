@@ -26,7 +26,7 @@ export class AppController {
   }
 
   @Put('todos/:idtodo')
-  editTodo(@Req() request: Request, @Param() params) : Promise<any>{
+  editTodo(@Req() request: any, @Param() params: any) : Promise<any>{
 
     const form : any = request.body;
     const idTodo: string = params.idtodo;
