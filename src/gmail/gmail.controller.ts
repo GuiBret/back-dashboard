@@ -6,13 +6,10 @@ import { GmailService } from './gmail.service';
 
 @Controller('gmail')
 export class GmailController {
-    
-    constructor(private gmailService: GmailService, private ecs: EasyconfigService) {
-        
-    }
+    constructor(private gmailService: GmailService, private ecs: EasyconfigService) {}
 
 
-    @Get('auth/url') 
+    @Get('auth/url')
     testLogin() {
 
         const response = {
@@ -27,6 +24,6 @@ export class GmailController {
 
             res.redirect(this.ecs.get('APP_LOCATION') + '/gmail/store-token/' + tokenObj.access_token + '/' + tokenObj.expiry_date);
         });
-        
+
     }
 }

@@ -1,4 +1,4 @@
-import { Module, HttpModule, CacheModule } from '@nestjs/common';
+import { Module, HttpModule } from '@nestjs/common';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -18,10 +18,10 @@ require('dotenv').config();
   imports: [EasyconfigModule.register({
     path: './.env'
   }),
-  MongooseModule.forRoot("mongodb+srv://" + process.env.DATABASE_USERNAME + ":" + process.env.DATABASE_PASSWORD + "@" + process.env.DATABASE_HOST),
+  MongooseModule.forRoot('mongodb+srv://' + process.env.DATABASE_USERNAME + ':' + process.env.DATABASE_PASSWORD + '@' + process.env.DATABASE_HOST),
   MongooseModule.forFeature([{name: Todo.name, schema: TodoSchema}]),
   HttpModule,
-  
+
   ],
   controllers: [AppController, SpotifyController, GmailController],
   providers: [AppService, SpotifyService, GmailService],

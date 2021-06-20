@@ -5,31 +5,31 @@ import { SpotifySearchResponse } from '@models/spotify-search-response.interface
 import { SpotifyArtist } from '@models/spotify-artist.interface';
 import * as fs from 'fs';
 import { EasyconfigService } from 'nestjs-easyconfig';
-import { response } from 'express';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class SpotifyService implements OnModuleInit {
-    spotify_token = "";
-    clientId = "";
-    clientSecret = "";
-    
+    spotify_token = '';
+    clientId = '';
+    clientSecret = '';
+
     constructor(private http: HttpService, private ecs: EasyconfigService) {}
 
     onModuleInit(): void {
         const content: any = JSON.parse(fs.readFileSync('./config/spotify/spotify.conf').toString());
-        
+
         if(content) {
             this.clientId = content.CLIENTID;
             this.clientSecret = content.CLIENTSECRET;
-            
-        }
-    } 
 
-    
+        }
+    }
+
+
     hasInformations(): boolean {
         return this.clientId !== '' && this.clientSecret !== '';
     }
-    getUrl() {
+    getUrl(): string {
         const redirectUri = this.ecs.get('SERVER_ROOT') + '/spotify/auth/code';
         return 'https://accounts.spotify.com/authorize?' + querystring.stringify({
             'scope': 'user-read-private user-read-email user-read-playback-state user-modify-playback-state streaming',
@@ -39,19 +39,16 @@ export class SpotifyService implements OnModuleInit {
         });
     }
 
-    getSpotifyToken(code: string, clientId: string, clientSecret: string) {
-
-    // const form = new FormData();
+    getSpotifyToken(code: string): Observable<any> {
         const formEncoded = {
             code: code,
             redirect_uri: this.ecs.get('SERVER_ROOT') + '/spotify/auth/code',
-            grant_type: "authorization_code"
+            grant_type: 'authorization_code'
         };
-        
-        
+
         return this.http.post('https://accounts.spotify.com/api/token', querystring.stringify(formEncoded), {
             headers: {
-            
+
             'Authorization': 'Basic ' + this.generateBase64Hash(),
             'Content-Type': 'application/x-www-form-urlencoded'
             }
@@ -59,25 +56,25 @@ export class SpotifyService implements OnModuleInit {
     }
 
     storeSpotifyToken(token: string) : void {
-        
+
         this.spotify_token = token;
-    
+
     }
 
     get spotifyToken() : string {
       return this.spotify_token;
     }
 
-    spotifyAutoComp(query: string, token: string, typeParams: string) {
-        
+    spotifyAutoComp(query: string, token: string, typeParams: string): Observable<any> {
+
         const reqOpts = {
             headers: {
                 'Authorization': 'Bearer ' + token
-            },                
+            },
         };
 
-        
-        
+
+
         return this.http.get(`https://api.spotify.com/v1/search?q=${query}&type=${typeParams}&limit=5`, reqOpts)
                         .pipe(map((response: {data: SpotifySearchResponse}) => {
                             const responseData = [];
@@ -90,25 +87,25 @@ export class SpotifyService implements OnModuleInit {
                                         status: 'KO',
                                         error: 'NO_RECORDS_FOUND',
                                         data: {}
-                                    }
+                                    };
                                 } else {
                                     const artistsFiltered = artists.map(this.generateArtistElement.bind(this));
                                     responseData.push(...artistsFiltered);
-                                    
-    
+
+
                                 }
                             }
 
-                            
+
                             if(response.data.tracks) {
-                                
+
                                 const tracks: Array<any> = response.data.tracks.items;
                                 const tracksFiltered : Array<any> = tracks.map(this.generateTrackElement.bind(this));
                                 responseData.push(...tracksFiltered);
                             }
 
                             if(response.data.albums) {
-                                
+
                                 if(response.data.albums.length !== 0) {
                                     const albums: Array<any> = response.data.albums.items;
                                     const albumsFiltered : Array<any> = albums.map(this.generateAlbumElement.bind(this));
@@ -122,9 +119,9 @@ export class SpotifyService implements OnModuleInit {
                                 data: responseData
                             };
 
-                            
-                            
-                            
+
+
+
                         }));
     }
 
@@ -142,12 +139,12 @@ export class SpotifyService implements OnModuleInit {
             type: 'artist'
         };
     }
-    
+
 
 
     private generateTrackElement(track: any) {
-        
-        
+
+
         let lastImageUrl = '';
         if(track.album.images.length !== 0) {
             lastImageUrl = track.album.images[track.album.images.length - 1].url;
@@ -160,12 +157,12 @@ export class SpotifyService implements OnModuleInit {
             name: track.name,
             uri: track.uri,
             type: 'track'
-        }
+        };
     }
 
     private generateAlbumElement(album: any) {
 
-        
+
         let lastImageUrl = '';
         if(album.images.length !== 0) {
             lastImageUrl = album.images[album.images.length - 1].url;
@@ -178,7 +175,7 @@ export class SpotifyService implements OnModuleInit {
             name: album.name,
             uri: album.uri,
             type: 'album'
-        }
+        };
     }
 
 
@@ -186,7 +183,7 @@ export class SpotifyService implements OnModuleInit {
      * Calls Spotify's endpoint delivering a new token from a refresh
      * @param refreshToken The refresh token
      */
-    getNewAccessToken(refreshToken: string) {
+    getNewAccessToken(refreshToken: string): Observable<any> {
 
         const formEncoded = {
             grant_type: 'refresh_token',
@@ -197,12 +194,12 @@ export class SpotifyService implements OnModuleInit {
             headers: {
                 'Authorization': 'Basic ' + this.generateBase64Hash()
             }
-        }
-        
+        };
+
         return this.http.post('https://accounts.spotify.com/api/token', querystring.stringify(formEncoded), reqOpts)
                         .pipe(
-                        catchError((error) => {
-                            
+                        catchError(() => {
+
                             throw new HttpException({status: 'KO', error: 'INVALID_REFRESH', message: 'Invalid refresh token'}, HttpStatus.FORBIDDEN);
                         })
         );
@@ -215,7 +212,7 @@ export class SpotifyService implements OnModuleInit {
         return (new Buffer(this.clientId + ':' + this.clientSecret).toString('base64'));
     }
 
-    getUserInfo(token: string) {
+    getUserInfo(token: string): Observable<any> {
         const reqOpts = {
             headers: {
                 'Authorization': 'Bearer ' + token

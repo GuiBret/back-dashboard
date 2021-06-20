@@ -21,7 +21,7 @@ export class SpotifyController {
         return { status: 'KO', message: 'MISSING_CLIENT_OR_SECRET'};
       }
 
-        
+
     }
 
     // TODO : déplacer les données dans le service
@@ -30,15 +30,14 @@ export class SpotifyController {
         console.log(referer);
         const content = fs.readFileSync('./config/spotify/spotify.conf').toString();
         if(content) {
-            const jsonContent = JSON.parse(content);
-          
+
             return {
               url: this.spotifyService.getUrl()
-            }
-            
-     
+            };
+
+
         } else {
-            return "";
+            return '';
         }
 
     }
@@ -47,7 +46,7 @@ export class SpotifyController {
   q(@Param() params, @Headers('Authorization') authHeader, @Req() req) {
     const queryStr = params.query;
     const typeParams = req.query.type;
-    
+
     if(!authHeader) {
       return {status: 'KO', error: 'MISSING_TOKEN'};
     } else {
@@ -55,38 +54,34 @@ export class SpotifyController {
 
       return this.spotifyService.spotifyAutoComp(queryStr, token, typeParams);
     }
-    
   }
   @Get('auth/code')
   getToken(@Query() query, @Res() res) {
-    
 
     // Case "Code received" => get token
     if(query.code) {
         const code = query.code;
-        
-        this.spotifyService.getSpotifyToken(code, this.clientId, this.clientSecret)
+        this.spotifyService.getSpotifyToken(code)
                            .pipe(map((response) => {
                                return response.data;
-                        
                            })).subscribe((response) => {
-                               
+
                                 this.spotifyService.storeSpotifyToken(response.access_token);
                                 res.redirect(this.ecs.get('APP_LOCATION') + '/spotify/store-token/' + response.access_token + '/' + response.refresh_token);
         });
 
     } else { // Case "token received"
-      
+
       this.spotifyService.storeSpotifyToken(query.access_token);
-      
+
     }
-    
+
   }
 
   @Get('auth/refresh/:refresh')
   getRefreshedToken(@Param('refresh') refreshToken: string) {
     return this.spotifyService.getNewAccessToken(refreshToken).pipe(map((response: any) => {
-      
+
       const pushedData = {
         token: response.data.access_token
       };
@@ -96,7 +91,7 @@ export class SpotifyController {
 
   @Get('artists/:id')
   getArtistFromSpotify(@Param('id') artistId) {
-    
+    console.log(artistId);
     // this.spotifyService.getArtistInfo()
   }
 

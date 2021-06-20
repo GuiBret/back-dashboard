@@ -6,28 +6,28 @@ import { EasyconfigService } from 'nestjs-easyconfig';
 
 @Injectable()
 export class GmailService implements OnModuleInit {
-    spotify_token = "";
-    clientId = "";
-    clientSecret = "";
-    
+    spotify_token = '';
+    clientId = '';
+    clientSecret = '';
+
     constructor(private http: HttpService, private ecs: EasyconfigService) {}
 
     onModuleInit(): void {
         try {
-            
+
             const credentials = JSON.parse(fs.readFileSync('./config/gmail/credentials.json').toString());
-            
+
             this.clientId = credentials.web.client_id;
             this.clientSecret = credentials.web.client_secret;
 
-        } catch(error) {       
+        } catch(error) {
             // TODO: Handle error
         }
-    } 
+    }
 
-    handleGmailLogin(): string {  
+    handleGmailLogin(): string {
         const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/auth/code');
-        
+
         const authUrl = oauth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: ['https://www.googleapis.com/auth/gmail.readonly', 'https://mail.google.com/']
@@ -35,16 +35,15 @@ export class GmailService implements OnModuleInit {
         return authUrl;
        }
 
-    getToken(code: string) {
+    getToken(code: string): Promise<any> {
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/auth/code');
 
             oauth2Client.getToken(code, (err, token) => {
-                
                 resolve(token);
             });
-        })
+        });
     }
 
 }
