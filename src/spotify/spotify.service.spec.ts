@@ -1,22 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SpotifyService } from './spotify.service';
 import { HttpService } from '@nestjs/common';
+import { EasyconfigService } from 'nestjs-easyconfig';
 
 describe('SpotifyService', () => {
   let service: SpotifyService;
 
-  beforeEach(async () => {
+  beforeEach(async() => {
 
-    let httpServiceStub: Partial<HttpService>;
-
-    httpServiceStub = {
+    const httpServiceStub: Partial<HttpService> = {
       get: jasmine.createSpy()
-    }
+    };
+
+    const easyConfigService : Partial<EasyconfigService> = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [SpotifyService,
       {
         provide: HttpService, useValue: httpServiceStub
-      }],
+      },
+      {provide: EasyconfigService, useValue: easyConfigService}],
     }).compile();
 
     service = module.get<SpotifyService>(SpotifyService);
@@ -34,6 +36,6 @@ describe('SpotifyService', () => {
       const hash = service['generateBase64Hash']();
 
       expect(hash).toEqual(new Buffer('mockClientId:mockClientSecret').toString('base64'));
-    })
-  })
+    });
+  });
 });

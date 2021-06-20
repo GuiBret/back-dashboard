@@ -1,20 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EasyconfigService } from 'nestjs-easyconfig';
 import { SpotifyController } from './spotify.controller';
 import { SpotifyService } from './spotify.service';
 
 describe('SpotifyController', () => {
   let controller: SpotifyController;
 
-  let spotifyServiceStub: Partial<SpotifyService>;
+  const spotifyServiceStub: Partial<SpotifyService> = {};
+  const easyConfigService: Partial<EasyconfigService> = {};
 
-  spotifyServiceStub = {
-
-  };
-  beforeEach(async () => {
+  beforeEach(async() => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SpotifyController],
       providers:[
-        {provide: SpotifyService, useValue: spotifyServiceStub}
+        {provide: SpotifyService, useValue: spotifyServiceStub},
+        {provide: EasyconfigService, useValue: easyConfigService}
       ]
     }).compile();
 
