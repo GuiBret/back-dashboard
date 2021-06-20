@@ -37,7 +37,7 @@ jobs:
             # End to End test
             - run:
                 name: End to End Test
-                command: npm run e2e -- --protractor-config=e2e/protractor-ci.conf.js
+                command: jest --config ./test/jest-e2e.json
 workflows:
     version: 2
     # the test workflow
