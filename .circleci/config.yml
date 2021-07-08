@@ -37,7 +37,7 @@ jobs:
             # End to End test
             - run:
                 name: End to End Test
-                command: jest --config ./test/jest-e2e.json
+                command: npm run test:e2e
 workflows:
     version: 2
     # the test workflow
