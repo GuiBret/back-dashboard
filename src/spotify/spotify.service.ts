@@ -36,7 +36,7 @@ export class SpotifyService implements OnModuleInit {
             'client_id': this.clientId,
             'redirect_uri': redirectUri,
             'response_type': 'code',
-        });
+        }); 
     }
 
     getSpotifyToken(code: string): Observable<any> {

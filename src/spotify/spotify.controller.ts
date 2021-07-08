@@ -15,19 +15,16 @@ export class SpotifyController {
     @Get('auth/precheck')
     spotifyPrecheck() {
       if(this.spotifyService.hasInformations()) {
-        return { status: 'KO', error: 'GET_TOKEN',url: this.spotifyService.getUrl()};
+        return { status: 'OK', message: 'GET_TOKEN',url: this.spotifyService.getUrl()};
 
-      } else {
-        return { status: 'KO', message: 'MISSING_CLIENT_OR_SECRET'};
       }
 
-
+      return { status: 'KO', message: 'MISSING_CLIENT_OR_SECRET'};
     }
 
     // TODO : déplacer les données dans le service
     @Get('auth/url')
-    getSpotifyUrl(@Headers('referer') referer) {
-        console.log(referer);
+    getSpotifyUrl() {
         const content = fs.readFileSync('./config/spotify/spotify.conf').toString();
         if(content) {
 
@@ -36,9 +33,9 @@ export class SpotifyController {
             };
 
 
-        } else {
-            return '';
         }
+
+        return {};
 
     }
 
