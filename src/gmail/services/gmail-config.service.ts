@@ -1,4 +1,4 @@
-import { Injectable, HttpService, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import { google } from 'googleapis';
 import { EasyconfigService } from 'nestjs-easyconfig';
@@ -40,8 +40,6 @@ export class GmailConfigService {
 
         return new Observable((observer) => {
             const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/auth/code');
-
-            console.log(oauth2Client.getToken(code, () => {}));
             oauth2Client.getToken(code, (err, token) => {
                 console.log(err);
                 observer.next(token);
