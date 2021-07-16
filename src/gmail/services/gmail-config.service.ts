@@ -2,6 +2,7 @@ import { Injectable, HttpService, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 import { google } from 'googleapis';
 import { EasyconfigService } from 'nestjs-easyconfig';
+import { Observable } from 'rxjs';
 
 
 @Injectable()
@@ -35,13 +36,15 @@ export class GmailConfigService {
         return authUrl;
        }
 
-    getToken(code: string): Promise<any> {
+    getTokenRequest(code: string): Observable<any> {
 
-        return new Promise((resolve) => {
+        return new Observable((observer) => {
             const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.ecs.get('SERVER_ROOT') + '/gmail/auth/code');
 
+            console.log(oauth2Client.getToken(code, () => {}));
             oauth2Client.getToken(code, (err, token) => {
-                resolve(token);
+                console.log(err);
+                observer.next(token);
             });
         });
     }

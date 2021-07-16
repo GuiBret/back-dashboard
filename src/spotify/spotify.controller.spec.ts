@@ -10,12 +10,13 @@ describe('SpotifyController', () => {
 
   const spotifyConfigServiceStub: Partial<SpotifyConfigService> = {
     storeSpotifyToken: jest.fn(),
-    getSpotifyToken: jest.fn(() => new Observable()),
+    getSpotifyTokenRequest: jest.fn(() => new Observable()),
     getLoginUrl: jest.fn()
   };
 
   const spotifyServiceStub: Partial<SpotifyService> = {
-    spotifyAutoComp: jest.fn()
+    spotifyAutoComp: jest.fn(),
+    getSpotifyToken: jest.fn(() => new Observable())
   };
   const easyConfigService: Partial<EasyconfigService> = {};
 
@@ -130,7 +131,7 @@ describe('SpotifyController', () => {
 
       controller.getToken(mockQuery, mockResponse);
 
-      expect(spotifyConfigServiceStub.getSpotifyToken).toHaveBeenCalledWith(mockQuery.code);
+      expect(spotifyServiceStub.getSpotifyToken).toHaveBeenCalledWith(mockQuery.code);
     });
   });
 });

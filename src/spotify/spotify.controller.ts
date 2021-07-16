@@ -59,13 +59,9 @@ export class SpotifyController {
     // Case "Code received" => get token
     if(query.code) {
         const code = query.code;
-        this.spotifyConfig.getSpotifyToken(code)
-                           .pipe(map((response) => {
-                               return response.data;
-                           })).subscribe((response) => {
-
-                                this.spotifyConfig.storeSpotifyToken(response.access_token);
-                                res.redirect(this.ecs.get('APP_LOCATION') + '/spotify/store-token/' + response.access_token + '/' + response.refresh_token);
+        this.spotifyService.getSpotifyToken(code)
+            .subscribe((response) => {
+              res.redirect(this.ecs.get('APP_LOCATION') + '/spotify/store-token/' + response.access_token + '/' + response.refresh_token);
         });
 
     } else { // Case "token received"

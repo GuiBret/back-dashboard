@@ -35,8 +35,9 @@ export class SpotifyConfigService {
         return 'https://accounts.spotify.com/authorize?' + formEncoded;
     }
 
-    getSpotifyToken(code: string): Observable<any> {
+    getSpotifyTokenRequest(code: string): Observable<any> {
         const formEncoded = this.encodeFormForSpotifyToken(code);
+
 
         return this.http.post('https://accounts.spotify.com/api/token', formEncoded, {
             headers: {

@@ -10,20 +10,20 @@ export class GmailController {
 
 
     @Get('auth/url')
-    testLogin() {
+    getLoginUrl() {
 
-        const response = {
-            url: this.gmailService.handleGmailLogin()
+        return {
+            url: this.gmailService.getGmailLoginUrl()
         };
-        return response;
     }
 
     @Get('auth/code')
     getAuthCode(@Query() query, @Res() res) {
-        this.gmailService.getToken(query.code).then((tokenObj: {access_token: string, expiry_date: number}) => {
+        this.gmailService.getToken(query.code).subscribe(this.makeRedirectWithTokenInfo.bind(this, res));
 
-            res.redirect(this.ecs.get('APP_LOCATION') + '/gmail/store-token/' + tokenObj.access_token + '/' + tokenObj.expiry_date);
-        });
+    }
 
+    private makeRedirectWithTokenInfo(res: any, tokenObj: { expiry_date: string, access_token: string}) {
+        res.redirect(this.ecs.get('APP_LOCATION') + '/gmail/store-token/' + tokenObj.access_token + '/' + tokenObj.expiry_date);
     }
 }

@@ -19,9 +19,20 @@ export class SpotifyService implements OnModuleInit {
     onModuleInit(): void {
         this.spotifyConfig.extractSpotifyParams();
     }
-    
+
     getNewAccessToken(refreshToken: string): Observable<any> {
         return this.spotifyConfig.getNewAccessToken(refreshToken);
+    }
+
+    getSpotifyToken(code: string): Observable<{access_token: string, refresh_token: string}> {
+        const request = this.spotifyConfig.getSpotifyTokenRequest(code);
+
+        return request.pipe(map((response: any) => {
+
+            this.spotifyConfig.storeSpotifyToken(response.access_token);
+
+            return response.data;
+        }));
     }
 
 
@@ -32,8 +43,6 @@ export class SpotifyService implements OnModuleInit {
                 'Authorization': 'Bearer ' + token
             },
         };
-
-
 
         return this.http.get(`https://api.spotify.com/v1/search?q=${query}&type=${typeParams}&limit=5`, reqOpts)
                         .pipe(map(this.handleSearchResponse.bind(this)));

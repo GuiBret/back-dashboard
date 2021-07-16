@@ -109,10 +109,9 @@ describe('SpotifyConfigService', () => {
         }
       };
 
-      service.getSpotifyToken('ABCDEF');
+      service.getSpotifyTokenRequest('ABCDEF');
 
       expect(httpServiceStub.post).toHaveBeenCalledWith('https://accounts.spotify.com/api/token', expectedForm, expectedHeaderObject);
-
 
     });
   });

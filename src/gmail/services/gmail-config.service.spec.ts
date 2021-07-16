@@ -9,7 +9,9 @@ describe('GmailConfigService', () => {
 
   beforeEach(async() => {
 
-    const easyConfigService : Partial<EasyconfigService> = {};
+    const easyConfigService : Partial<EasyconfigService> = {
+      get: jest.fn()
+    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [GmailConfigService,
       {provide: EasyconfigService, useValue: easyConfigService},
@@ -36,5 +38,21 @@ describe('GmailConfigService', () => {
         expect(service.clientSecret).toEqual('abcdef');
     });
   });
+
+  // TODO: test functions with Gmail login
+  // describe('Get token request', () => {
+  //   it('should have called Googles OAuth client to generate the URL', (done) => {
+  //     google.auth.OAuth2.prototype.getToken = jest.fn((code, cb) => cb(code));
+
+  //     const result = service.getTokenRequest('ABCDEF');
+  //     result.subscribe((res) => {
+  //       console.log(res);
+  //       done();
+  //     }, (err) => {
+  //       console.log(err);
+  //       done();
+  //     });
+  //   });
+  // });
 
 });
