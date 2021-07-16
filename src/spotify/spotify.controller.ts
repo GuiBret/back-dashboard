@@ -4,18 +4,19 @@ import { SpotifyService } from './spotify.service';
 import * as fs from 'fs';
 import { map } from 'rxjs/operators';
 import { EasyconfigService } from 'nestjs-easyconfig';
+import { SpotifyConfigService } from './services/spotify-config.service';
 
 
 @Controller('spotify')
 export class SpotifyController {
     clientId = '';
     clientSecret = '';
-    constructor(private spotifyService: SpotifyService, private ecs: EasyconfigService) {}
+    constructor(private spotifyService: SpotifyService, private spotifyConfig: SpotifyConfigService, private ecs: EasyconfigService) {}
 
     @Get('auth/precheck')
     spotifyPrecheck() {
-      if(this.spotifyService.hasInformations()) {
-        return { status: 'OK', message: 'GET_TOKEN',url: this.spotifyService.getUrl()};
+      if(this.spotifyConfig.hasInformations()) {
+        return { status: 'OK', message: 'GET_TOKEN',url: this.spotifyConfig.getLoginUrl()};
 
       }
 
@@ -29,7 +30,7 @@ export class SpotifyController {
         if(content) {
 
             return {
-              url: this.spotifyService.getUrl()
+              url: this.spotifyConfig.getLoginUrl()
             };
 
 
@@ -58,18 +59,18 @@ export class SpotifyController {
     // Case "Code received" => get token
     if(query.code) {
         const code = query.code;
-        this.spotifyService.getSpotifyToken(code)
+        this.spotifyConfig.getSpotifyToken(code)
                            .pipe(map((response) => {
                                return response.data;
                            })).subscribe((response) => {
 
-                                this.spotifyService.storeSpotifyToken(response.access_token);
+                                this.spotifyConfig.storeSpotifyToken(response.access_token);
                                 res.redirect(this.ecs.get('APP_LOCATION') + '/spotify/store-token/' + response.access_token + '/' + response.refresh_token);
         });
 
     } else { // Case "token received"
 
-      this.spotifyService.storeSpotifyToken(query.access_token);
+      this.spotifyConfig.storeSpotifyToken(query.access_token);
 
     }
 
@@ -77,7 +78,7 @@ export class SpotifyController {
 
   @Get('auth/refresh/:refresh')
   getRefreshedToken(@Param('refresh') refreshToken: string) {
-    return this.spotifyService.getNewAccessToken(refreshToken).pipe(map((response: any) => {
+    return this.spotifyConfig.getNewAccessToken(refreshToken).pipe(map((response: any) => {
 
       const pushedData = {
         token: response.data.access_token

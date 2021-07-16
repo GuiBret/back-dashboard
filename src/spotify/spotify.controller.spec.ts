@@ -1,17 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EasyconfigService } from 'nestjs-easyconfig';
 import { Observable } from 'rxjs';
+import { SpotifyConfigService } from './services/spotify-config.service';
 import { SpotifyController } from './spotify.controller';
 import { SpotifyService } from './spotify.service';
 
 describe('SpotifyController', () => {
   let controller: SpotifyController;
 
-  const spotifyServiceStub: Partial<SpotifyService> = {
-    getUrl: jest.fn(),
-    spotifyAutoComp: jest.fn(),
+  const spotifyConfigServiceStub: Partial<SpotifyConfigService> = {
     storeSpotifyToken: jest.fn(),
-    getSpotifyToken: jest.fn().mockReturnValue(new Observable())
+    getSpotifyToken: jest.fn(() => new Observable()),
+    getLoginUrl: jest.fn()
+  };
+
+  const spotifyServiceStub: Partial<SpotifyService> = {
+    spotifyAutoComp: jest.fn()
   };
   const easyConfigService: Partial<EasyconfigService> = {};
 
@@ -29,7 +33,8 @@ describe('SpotifyController', () => {
       controllers: [SpotifyController],
       providers:[
         {provide: SpotifyService, useValue: spotifyServiceStub},
-        {provide: EasyconfigService, useValue: easyConfigService}
+        {provide: EasyconfigService, useValue: easyConfigService},
+        { provide: SpotifyConfigService, useValue: spotifyConfigServiceStub}
       ]
     }).compile();
 
@@ -42,7 +47,7 @@ describe('SpotifyController', () => {
 
   describe('Spotify precheck', () => {
     it('should return the URL since the service has informations', () => {
-      spotifyServiceStub.hasInformations = jest.fn(() => true);
+      spotifyConfigServiceStub.hasInformations = jest.fn(() => true);
 
       const result = controller.spotifyPrecheck();
 
@@ -50,24 +55,20 @@ describe('SpotifyController', () => {
       expect(result).toHaveProperty('message', 'GET_TOKEN');
       expect(result).toHaveProperty('url');
 
-      expect(spotifyServiceStub.getUrl).toHaveBeenCalled();
+      expect(spotifyConfigServiceStub.getLoginUrl).toHaveBeenCalled();
     });
 
     it('should return an error since the service has no informations', () => {
-      spotifyServiceStub.hasInformations = jest.fn(() => false);
+      spotifyConfigServiceStub.hasInformations = jest.fn(() => false);
 
       const result = controller.spotifyPrecheck();
 
       expect(result).toHaveProperty('status', 'KO');
       expect(result).toHaveProperty('message', 'MISSING_CLIENT_OR_SECRET');
 
-      expect(spotifyServiceStub.getUrl).not.toHaveBeenCalled();
+      expect(spotifyConfigServiceStub.getLoginUrl).not.toHaveBeenCalled();
     });
   });
-
-  // describe('Get Spotify URL', () => {
-  //   it('should ')
-  // })
 
   describe('Search', () => {
     it('should return an error since the header was not provided', () => {
@@ -119,7 +120,7 @@ describe('SpotifyController', () => {
 
       controller.getToken(mockQuery, mockResponse);
 
-      expect(spotifyServiceStub.storeSpotifyToken).toHaveBeenCalledWith(mockQuery.access_token);
+      expect(spotifyConfigServiceStub.storeSpotifyToken).toHaveBeenCalledWith(mockQuery.access_token);
     });
 
     it('should call the service to get the token using the code passed', () => {
@@ -129,7 +130,7 @@ describe('SpotifyController', () => {
 
       controller.getToken(mockQuery, mockResponse);
 
-      expect(spotifyServiceStub.getSpotifyToken).toHaveBeenCalledWith(mockQuery.code);
+      expect(spotifyConfigServiceStub.getSpotifyToken).toHaveBeenCalledWith(mockQuery.code);
     });
   });
 });

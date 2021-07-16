@@ -9,6 +9,8 @@ import { SpotifyController } from './spotify/spotify.controller';
 import { SpotifyService } from './spotify/spotify.service';
 import { GmailService } from './gmail/gmail.service';
 import { GmailController } from './gmail/gmail.controller';
+import { SpotifyElementFactory } from './spotify/factories/spotify-element-factory';
+import { SpotifyConfigService } from './spotify/services/spotify-config.service';
 
 
 
@@ -24,6 +26,6 @@ require('dotenv').config();
 
   ],
   controllers: [AppController, SpotifyController, GmailController],
-  providers: [AppService, SpotifyService, GmailService],
+  providers: [AppService, SpotifyService, GmailService, SpotifyElementFactory, SpotifyConfigService],
 })
 export class AppModule {}

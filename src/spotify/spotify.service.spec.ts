@@ -2,23 +2,42 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SpotifyService } from './spotify.service';
 import { HttpService } from '@nestjs/common';
 import { EasyconfigService } from 'nestjs-easyconfig';
+import * as fs from 'fs';
+import { SpotifyElementFactory } from './factories/spotify-element-factory';
+import { SpotifyConfigService } from './services/spotify-config.service';
 
+let httpServiceStub : Partial<HttpService>;
+let spotifyElementFactoryStub: Partial<SpotifyElementFactory>;
+let spotifyConfigServiceStub: Partial<SpotifyConfigService>;
 describe('SpotifyService', () => {
   let service: SpotifyService;
 
   beforeEach(async() => {
 
-    const httpServiceStub: Partial<HttpService> = {
+    httpServiceStub = {
       get: jasmine.createSpy()
+    };
+
+    spotifyElementFactoryStub = {
+      generateAlbumElement: jest.fn(),
+      generateArtistElement: jest.fn(),
+      generateTrackElement: jest.fn(),
+    };
+
+    spotifyConfigServiceStub = {
+      extractSpotifyParams: jest.fn()
     };
 
     const easyConfigService : Partial<EasyconfigService> = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [SpotifyService,
       {
-        provide: HttpService, useValue: httpServiceStub
+        provide: HttpService, useValue: httpServiceStub,
       },
-      {provide: EasyconfigService, useValue: easyConfigService}],
+      {provide: EasyconfigService, useValue: easyConfigService},
+      { provide: SpotifyConfigService, useValue: spotifyConfigServiceStub},
+      { provide: SpotifyElementFactory, useValue: spotifyElementFactoryStub}
+    ],
     }).compile();
 
     service = module.get<SpotifyService>(SpotifyService);
@@ -28,14 +47,13 @@ describe('SpotifyService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('Generate base 64 hash', () => {
-    it('should generate a base 64 hash matching mocked data', () => {
-      service['clientId'] = 'mockClientId';
-      service['clientSecret'] = 'mockClientSecret';
+  describe('On module init', () => {
+    it('should call the config service to extract the info', () => {
 
-      const hash = service['generateBase64Hash']();
+      service.onModuleInit();
 
-      expect(hash).toEqual(new Buffer('mockClientId:mockClientSecret').toString('base64'));
+      expect(spotifyConfigServiceStub.extractSpotifyParams).toHaveBeenCalled();
+
     });
   });
 });
