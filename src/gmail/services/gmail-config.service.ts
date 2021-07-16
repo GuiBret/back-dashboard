@@ -2,19 +2,27 @@ import { Injectable, HttpService, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 import { google } from 'googleapis';
 import { EasyconfigService } from 'nestjs-easyconfig';
-import { GmailConfigService } from './services/gmail-config.service';
 
 
 @Injectable()
-export class GmailService implements OnModuleInit {
-    spotify_token = '';
+export class GmailConfigService {
     clientId = '';
     clientSecret = '';
 
-    constructor(private gmailConfig: GmailConfigService, private ecs: EasyconfigService) {}
+    constructor(private ecs: EasyconfigService) {}
 
-    onModuleInit(): void {
-        this.gmailConfig.extractGmailParams();
+    extractGmailParams(): void {
+        try {
+
+            const credentials = JSON.parse(fs.readFileSync('./config/gmail/credentials.json').toString());
+
+            this.clientId = credentials.web.client_id;
+            this.clientSecret = credentials.web.client_secret;
+
+        } catch(error) {
+            // TODO: Handle error
+            return error;
+        }
     }
 
     handleGmailLogin(): string {
