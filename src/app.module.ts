@@ -13,13 +13,13 @@ import { GmailController } from './gmail/gmail.controller';
 require('dotenv').config();
 
 @Module({
-  imports: [EasyconfigModule.register({
-    path: './.env'
-  }),
-  MongooseModule.forRoot("mongodb+srv://" + process.env.DATABASE_USERNAME + ":" + process.env.DATABASE_PASSWORD + "@" + process.env.DATABASE_HOST),
-  MongooseModule.forFeature([{name: TodoMongoose.name, schema: Todo}]),
-  HttpModule,
-  
+  imports: [
+    EasyconfigModule.register({
+      path: './.env',
+    }),
+    //MongooseModule.forRoot("mongodb+srv://" + process.env.DATABASE_USERNAME + ":" + process.env.DATABASE_PASSWORD + "@" + process.env.DATABASE_HOST),
+    // MongooseModule.forFeature([{name: TodoMongoose.name, schema: Todo}]),
+    HttpModule,
   ],
   controllers: [AppController, SpotifyController, GmailController],
   providers: [AppService, SpotifyService, GmailService],
