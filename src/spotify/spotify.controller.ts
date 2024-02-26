@@ -12,14 +12,16 @@ import { SpotifyService } from './spotify.service';
 import * as fs from 'fs';
 import { map } from 'rxjs/operators';
 import { EasyconfigService } from 'nestjs-easyconfig';
+import { SharedService } from 'src/shared/shared.service';
 
 @Controller('spotify')
 export class SpotifyController {
   clientId = '';
-  clientSecret = '';
+  cret = '';
   constructor(
     private spotifyService: SpotifyService,
     private ecs: EasyconfigService,
+    private sharedService: SharedService,
   ) {}
 
   @Get('precheck')
@@ -28,7 +30,7 @@ export class SpotifyController {
       return {
         status: 'KO',
         error: 'GET_TOKEN',
-        url: this.spotifyService.getUrl(),
+        url: this.spotifyService.getAuthorizationUrl(),
       };
     } else {
       return { status: 'KO', message: 'MISSING_CLIENT_OR_SECRET' };
@@ -40,10 +42,8 @@ export class SpotifyController {
   getSpotifyUrl(@Headers('referer') referer) {
     const content = fs.readFileSync('./config/spotify/spotify.conf').toString();
     if (content) {
-      const jsonContent = JSON.parse(content);
-
       return {
-        url: this.spotifyService.getUrl(),
+        url: this.spotifyService.getAuthorizationUrl(),
       };
     } else {
       return '';
@@ -58,7 +58,7 @@ export class SpotifyController {
     if (!authHeader) {
       return { status: 'KO', error: 'MISSING_TOKEN' };
     } else {
-      const token = authHeader.split(' ')[1];
+      const token = this.sharedService.getBearerToken(authHeader);
 
       return this.spotifyService.spotifyAutoComp(queryStr, token, typeParams);
     }
@@ -70,7 +70,7 @@ export class SpotifyController {
       const code = query.code;
 
       this.spotifyService
-        .getSpotifyToken(code, this.clientId, this.clientSecret)
+        .getSpotifyToken(code)
         .pipe(
           map(response => {
             return response.data;
@@ -112,7 +112,7 @@ export class SpotifyController {
 
   @Get('my-info')
   getUserInfo(@Headers('Authorization') authHeader) {
-    const token = authHeader.split(' ')[1];
+    const token = this.sharedService.getBearerToken(authHeader);
     return this.spotifyService.getUserInfo(token);
   }
 }

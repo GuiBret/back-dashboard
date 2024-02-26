@@ -1,25 +1,32 @@
 import {
-  Injectable,
-  HttpService,
-  OnModuleInit,
   HttpException,
+  HttpService,
   HttpStatus,
+  Injectable,
+  OnModuleInit,
 } from '@nestjs/common';
-import * as querystring from 'querystring';
-import { map, catchError } from 'rxjs/operators';
-import { SpotifySearchResponse } from 'src/models/spotify-search-response.interface';
-import { SpotifyArtist } from 'src/models/spotify-artist.interface';
 import * as fs from 'fs';
 import { EasyconfigService } from 'nestjs-easyconfig';
-import { response } from 'express';
+import * as querystring from 'querystring';
+import { Observable } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { SpotifyArtist } from 'src/models/spotify-artist.interface';
+import { SpotifySearchResponse } from 'src/models/spotify-search-response.interface';
+import { SpotifyUserProfileDto } from './dtos/spotify-user-profile.dto';
+import { SpotifySearchType } from './enums/spotify-search-type.enum';
+import { SharedService } from 'src/shared/shared.service';
 
 @Injectable()
 export class SpotifyService implements OnModuleInit {
-  spotify_token = '';
+  token = '';
   clientId = '';
   clientSecret = '';
 
-  constructor(private http: HttpService, private ecs: EasyconfigService) {}
+  constructor(
+    private http: HttpService,
+    private ecs: EasyconfigService,
+    private sharedService: SharedService,
+  ) {}
 
   onModuleInit(): void {
     const content: any = JSON.parse(
@@ -31,13 +38,16 @@ export class SpotifyService implements OnModuleInit {
     }
   }
 
-  private read;
   hasInformations(): boolean {
     return this.clientId !== '' && this.clientSecret !== '';
   }
-  getUrl() {
+  getAuthorizationUrl(): string {
     const redirectUri = this.ecs.get('SERVER_ROOT') + '/spotify/get-code';
 
+    return this.generateAuthorizationUrl(redirectUri);
+  }
+
+  private generateAuthorizationUrl(redirectUri: string) {
     return (
       'https://accounts.spotify.com/authorize?' +
       querystring.stringify({
@@ -50,7 +60,7 @@ export class SpotifyService implements OnModuleInit {
     );
   }
 
-  getSpotifyToken(code: string, clientId: string, clientSecret: string) {
+  getSpotifyToken(code: string) {
     // const form = new FormData();
     const formEncoded = {
       code: code,
@@ -63,7 +73,9 @@ export class SpotifyService implements OnModuleInit {
       querystring.stringify(formEncoded),
       {
         headers: {
-          Authorization: 'Basic ' + this.generateBase64Hash(),
+          Authorization: this.sharedService.generateAuthorizationHeaderFromString(
+            this.clientId + ':' + this.clientSecret,
+          ),
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       },
@@ -71,11 +83,11 @@ export class SpotifyService implements OnModuleInit {
   }
 
   storeSpotifyToken(token: string): void {
-    this.spotify_token = token;
+    this.token = token;
   }
 
   get spotifyToken(): string {
-    return this.spotify_token;
+    return this.token;
   }
 
   spotifyAutoComp(query: string, token: string, typeParams: string) {
@@ -92,10 +104,13 @@ export class SpotifyService implements OnModuleInit {
       )
       .pipe(
         map((response: { data: SpotifySearchResponse }) => {
+          return response.data;
+        }),
+        map((searchResponse: SpotifySearchResponse) => {
           const responseData = [];
 
-          if (response.data.artists) {
-            const artists: Array<SpotifyArtist> = response.data.artists.items;
+          if (searchResponse.artists) {
+            const artists: Array<SpotifyArtist> = searchResponse.artists.items;
 
             if (artists.length === 0) {
               return {
@@ -111,17 +126,17 @@ export class SpotifyService implements OnModuleInit {
             }
           }
 
-          if (response.data.tracks) {
-            const tracks: Array<any> = response.data.tracks.items;
+          if (searchResponse.tracks) {
+            const tracks: Array<any> = searchResponse.tracks.items;
             const tracksFiltered: Array<any> = tracks.map(
               this.generateTrackElement.bind(this),
             );
             responseData.push(...tracksFiltered);
           }
 
-          if (response.data.albums) {
-            if (response.data.albums.length !== 0) {
-              const albums: Array<any> = response.data.albums.items;
+          if (searchResponse.albums) {
+            if (searchResponse.albums.length !== 0) {
+              const albums: Array<any> = searchResponse.albums.items;
               const albumsFiltered: Array<any> = albums.map(
                 this.generateAlbumElement.bind(this),
               );
@@ -147,7 +162,7 @@ export class SpotifyService implements OnModuleInit {
       imageUrl: lastImageUrl,
       name: artist.name,
       uri: artist.uri,
-      type: 'artist',
+      type: SpotifySearchType.ARTIST,
     };
   }
 
@@ -162,7 +177,7 @@ export class SpotifyService implements OnModuleInit {
       imageUrl: lastImageUrl,
       name: track.name,
       uri: track.uri,
-      type: 'track',
+      type: SpotifySearchType.TRACK,
     };
   }
 
@@ -177,7 +192,7 @@ export class SpotifyService implements OnModuleInit {
       imageUrl: lastImageUrl,
       name: album.name,
       uri: album.uri,
-      type: 'album',
+      type: SpotifySearchType.ALBUM,
     };
   }
 
@@ -193,7 +208,9 @@ export class SpotifyService implements OnModuleInit {
 
     const reqOpts = {
       headers: {
-        Authorization: 'Basic ' + this.generateBase64Hash(),
+        Authorization: this.sharedService.generateAuthorizationHeaderFromString(
+          this.clientId + ':' + this.clientSecret,
+        ),
       },
     };
 
@@ -217,16 +234,7 @@ export class SpotifyService implements OnModuleInit {
       );
   }
 
-  /**
-   * Generates a hash in base 64 of clientId:clientSecret, used in login procedures
-   */
-  private generateBase64Hash() {
-    return new Buffer(this.clientId + ':' + this.clientSecret).toString(
-      'base64',
-    );
-  }
-
-  getUserInfo(token: string) {
+  getUserInfo(token: string): Observable<SpotifyUserProfileDto> {
     const reqOpts = {
       headers: {
         Authorization: 'Bearer ' + token,

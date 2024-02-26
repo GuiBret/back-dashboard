@@ -1,6 +1,7 @@
 import {
   SpotifyGenericExternalUrlsDto,
-  SpotifyGenericUserImageDto,
+  SpotifyGenericFollowersDto,
+  SpotifyGenericImageDto,
 } from './spotify-generic.dto';
 
 export class SpotifyUserProfileDto {
@@ -9,10 +10,10 @@ export class SpotifyUserProfileDto {
   email: string;
   explicit_content: SpotifyExplicitContentInfoDto;
   external_urls: SpotifyGenericExternalUrlsDto;
-  followers: SpotifyFollowersDto;
+  followers: SpotifyGenericFollowersDto;
   href: string;
   id: string;
-  images: SpotifyGenericUserImageDto;
+  images: SpotifyGenericImageDto;
   product: string;
   type: string;
   uri: string;
@@ -21,9 +22,4 @@ export class SpotifyUserProfileDto {
 export class SpotifyExplicitContentInfoDto {
   filter_enabled: boolean;
   filter_locked: boolean;
-}
-
-export class SpotifyFollowersDto {
-  href: string;
-  total: number;
 }
