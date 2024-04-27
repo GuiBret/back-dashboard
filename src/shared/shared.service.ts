@@ -7,6 +7,6 @@ export class SharedService {
   }
 
   generateAuthorizationHeaderFromString(baseStr: string): string {
-    return 'Bearer ' + new Buffer(baseStr).toString('base64');
+    return 'Basic ' + new Buffer(baseStr).toString('base64');
   }
 }
