@@ -2,17 +2,17 @@
 import {
   Controller,
   Get,
+  Headers,
   Param,
   Query,
-  Res,
   Req,
-  Headers,
+  Res,
 } from '@nestjs/common';
-import { SpotifyService } from './spotify.service';
 import * as fs from 'fs';
-import { map } from 'rxjs/operators';
 import { EasyconfigService } from 'nestjs-easyconfig';
+import { map } from 'rxjs/operators';
 import { SharedService } from 'src/shared/shared.service';
+import { SpotifyService } from './spotify.service';
 
 @Controller('spotify')
 export class SpotifyController {
@@ -68,7 +68,6 @@ export class SpotifyController {
     // Case "Code received" => get token
     if (query.code) {
       const code = query.code;
-
       this.spotifyService
         .getSpotifyToken(code)
         .pipe(
